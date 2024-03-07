@@ -2,7 +2,6 @@ package internet
 
 import (
 	"errors"
-	"fmt"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -43,16 +42,17 @@ func getAdaptersAddresses(family uint32, flags uint32) ([]*windows.IpAdapterAddr
 	return result, nil
 }
 
+// IsConnected returns true if there is network connectivity atleast via one network interface
 func IsConnected() (bool, error) {
 
-	v, err := getAdaptersAddresses(0, 0)
+	ifaces, err := getAdaptersAddresses(0, 0)
 	if err != nil {
-		return false, fmt.Errorf("%#v", err)
+		return false, err
 	}
 
-	for _, i := range v {
-		// fmt.Println("adapter name:", windows.UTF16PtrToString(i.FriendlyName), "status:", i.OperStatus)
-		if i.OperStatus == isConnected {
+	for _, addr := range ifaces {
+		// fmt.Println("adapter name:", windows.UTF16PtrToString(addr.FriendlyName), "status:", addr.OperStatus)
+		if addr.OperStatus == isConnected {
 			return true, nil
 		}
 	}
