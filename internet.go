@@ -1,10 +1,19 @@
 package internet
 
 import (
+	"errors"
 	"fmt"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
+)
+
+const (
+	isConnected uint32 = 1
+)
+
+var (
+	errNotConnected = errors.New("not connected to network")
 )
 
 /*
@@ -42,8 +51,11 @@ func IsConnected() (bool, error) {
 	}
 
 	for _, i := range v {
-		fmt.Println("adapter name:", windows.UTF16PtrToString(i.FriendlyName), "status:", i.OperStatus)
+		// fmt.Println("adapter name:", windows.UTF16PtrToString(i.FriendlyName), "status:", i.OperStatus)
+		if i.OperStatus == isConnected {
+			return true, nil
+		}
 	}
 
-	return true, nil
+	return false, errNotConnected
 }
